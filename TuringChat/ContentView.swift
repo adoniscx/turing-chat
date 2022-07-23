@@ -31,8 +31,8 @@ struct ContentView: View {
                 TextField("", text: $message)
                 Button("发送") {
                     messages.writeMessage(msg: message)
-                    getResponse(msg: message) { reviceMsg in
-                        messages.writeMessage(msg: reviceMsg, isMy: false)
+                    getResponse(msg: message) { receivedMsg in
+                        messages.writeMessage(msg: receivedMsg, isMy: false)
                     }
 
                 }
@@ -42,7 +42,7 @@ struct ContentView: View {
     }
 }
 
-func getResponse(msg: String, reviceHandler: @escaping (String) -> Void) {
+func getResponse(msg: String, receivedHandler: @escaping (String) -> Void) {
 
     let root = "http://api.qingyunke.com"
     let path = "/api.php"
@@ -60,7 +60,7 @@ func getResponse(msg: String, reviceHandler: @escaping (String) -> Void) {
             let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
 
             let result = jsonResponse?["content"] as? String ?? "好像出了一些问题"
-            reviceHandler(result)
+            receivedHandler(result)
         } catch {
             print(error)
         }
