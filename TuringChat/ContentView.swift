@@ -37,7 +37,7 @@ struct ContentView: View {
 struct Message : Identifiable {
     var id : Date
     var message : String
-}git add README.md
+}
 
 struct ChatBubble : View {
     var message : Message
