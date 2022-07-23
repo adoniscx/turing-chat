@@ -14,15 +14,19 @@ struct ContentView: View {
 
     var body: some View {
         VStack{
+
             ScrollView(.vertical, showsIndicators: false){
                 ScrollViewReader { proxy in
                     VStack{
                         ForEach(messages.messages) {msg in
-                            ChatBubble(message: msg)
+                            ChatBubble(message: msg).background()
+                                .frame(maxWidth: .infinity, alignment: msg.isMy ? .trailing :.leading )
                         }
                     }
                 }
             }
+            .background()
+            .frame(maxWidth: .infinity, alignment:  .topLeading)
             HStack(){
                 TextField("your turn", text: $message)
                 Button("Send") {
@@ -30,13 +34,14 @@ struct ContentView: View {
                 }
             }
             .background(Color.black.opacity(0.06))
-        }
+        }.background()
     }
 }
 
 struct Message : Identifiable {
     var id : Date
     var message : String
+    var isMy : Bool
 }
 
 struct ChatBubble : View {
@@ -48,8 +53,16 @@ struct ChatBubble : View {
 class Messages : ObservableObject {
     @Published var messages : [Message] = []
 
+    init() {
+        let sampleMessages : [String] = ["Hi", "Hello"]
+        for (index, sample) in sampleMessages.enumerated() {
+            messages.append(Message(id: Date(), message: sample, isMy: index % 2 == 0))
+        }
+    }
+
+
     func writeMessage(msg: String) {
-        messages.append(Message(id: Date(), message: msg))
+        messages.append(Message(id: Date(), message: msg, isMy: true))
     }
 }
 
