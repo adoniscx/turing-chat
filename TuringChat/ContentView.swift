@@ -28,9 +28,13 @@ struct ContentView: View {
             .background()
             .frame(maxWidth: .infinity, alignment:  .topLeading)
             HStack(){
-                TextField("your turn", text: $message)
-                Button("Send") {
+                TextField("", text: $message)
+                Button("发送") {
                     messages.writeMessage(msg: message)
+                    getResponse(msg: message) { reviceMsg in
+                        messages.writeMessage(msg: reviceMsg, isMy: false)
+                    }
+
                 }
             }
             .background(Color.black.opacity(0.06))
@@ -38,6 +42,30 @@ struct ContentView: View {
     }
 }
 
+func getResponse(msg: String, reviceHandler: @escaping (String) -> Void) {
+
+    let root = "http://api.qingyunke.com"
+    let path = "/api.php"
+    var urlcomps = URLComponents(string: root)!
+    urlcomps.path = path
+    urlcomps.queryItems = [URLQueryItem(name: "key", value: "free"), URLQueryItem(name: "appid", value: String(0)), URLQueryItem(name: "msg", value: msg)]
+    let url = urlcomps.url!
+
+    URLSession.shared.dataTask(with: url) {(data, response, error) in
+        guard let data = data, error == nil else { return }
+        guard let response = response as? HTTPURLResponse, (200...299).contains(response.statusCode) else {
+            return
+        }
+        do {
+            let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+
+            let result = jsonResponse?["content"] as? String ?? "好像出了一些问题"
+            reviceHandler(result)
+        } catch {
+            print(error)
+        }
+    }.resume()
+}
 struct Message : Identifiable {
     var id : Date
     var message : String
@@ -54,15 +82,15 @@ class Messages : ObservableObject {
     @Published var messages : [Message] = []
 
     init() {
-        let sampleMessages : [String] = ["Hi", "Hello"]
+        let sampleMessages : [String] = []
         for (index, sample) in sampleMessages.enumerated() {
             messages.append(Message(id: Date(), message: sample, isMy: index % 2 == 0))
         }
     }
 
 
-    func writeMessage(msg: String) {
-        messages.append(Message(id: Date(), message: msg, isMy: true))
+    func writeMessage(msg: String, isMy: Bool = true) {
+        messages.append(Message(id: Date(), message: msg, isMy: isMy))
     }
 }
 
