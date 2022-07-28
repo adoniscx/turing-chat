@@ -6,7 +6,7 @@
 
 ### 1. Clone the project.
 ```
-git clone git@github.com:adoniscx/turing-chat.git
+git clone https://github.com/adoniscx/turing-chat.git
 ```
 
 ### 2. Opent in Xcode.
